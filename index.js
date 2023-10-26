@@ -2,8 +2,11 @@ const express = require("express");
 const app = express();
 const port = 8080;
 
+app.set("New engine", "ejs");
+
 app.get("/", (request, response) => {
-    response.send("I am alive!");
+    let result={name:"Stef"}; 
+    response.render("index.ejs", result);
 });
 
 app.listen(port, () => {
