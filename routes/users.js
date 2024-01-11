@@ -5,6 +5,12 @@ const { db } = require("../services/db.js");
 const { getUserJwt } = require("../services/auth.js");
 const bcrypt = require("bcrypt");
 
+// GET /users/signout
+router.get("/signout", function (req, res, next) {
+  res.clearCookie(process.env.AUTH_COOKIE_NAME);
+  res.redirect("/");
+});
+
 // GET /users/signin
 router.get("/signin", function (req, res, next) {
   res.render("users/signin", { result: { display_form: true } });
@@ -31,18 +37,16 @@ router.post("/signin", function (req, res, next) {
   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
   const dbResult = stmt.get(email);
 
-  if (dbResult){
+  if (dbResult) {
     const passwordHash = dbResult.password;
     const compareResult = bcrypt.compareSync(password, passwordHash);
 
-    if (!compareResult){
+    if (!compareResult) {
       res.render("users/signin", { result: { invalid_credentials: true } });
     }
-  }
 
-  if (dbResult) {
     const token = getUserJwt(dbResult.id, dbResult.email, dbResult.name, dbResult.role);
-    res.cookie("auth", token);
+    res.cookie(process.env.AUTH_COOKIE_NAME, token);
 
     res.render("users/signin", { result: { success: true } });
   } else {
@@ -72,18 +76,23 @@ router.post("/signup", function (req, res, next) {
     return;
   }
 
-  const passwordHash = bcrypt.hashSync(req.body.password, 10);
-
-  const stmt = db.prepare("INSERT INTO users (email, password, name, signed_at, role) VALUES (?, ?, ?, ?, ?);");
-
-  const insert_result = stmt.run(req.body.email, passwordHash, req.body.name, Date.now(), "user"); 
-
-  if (insert_result.changes && insert_result.changes==1){
-    res.render("users/signup", { result: { success: true } });
-  }else{
-    res.render("users/signup", { result: { database_error: true } });
+  const stmt1 = db.prepare("SELECT * FROM users WHERE email = ?;");
+  const selectResult = stmt1.get(req.body.email);
+  if(selectResult){
+    res.render("users/signup", { result: { email_in_use: true, display_form: true } });
+    return;
   }
 
+  const passwordHash = bcrypt.hashSync(req.body.password, 10);
+
+  const stmt2 = db.prepare("INSERT INTO users (email, password, name, signed_at, role) VALUES (?, ?, ?, ?, ?);");
+  const insertResult = stmt2.run(req.body.email, passwordHash, req.body.name, Date.now(), "user");
+
+  if (insertResult.changes && insertResult.changes === 1) {
+    res.render("users/signup", { result: { success: true } });
+  } else {
+    res.render("users/signup", { result: { database_error: true } });
+  }
 });
 
 module.exports = router;
