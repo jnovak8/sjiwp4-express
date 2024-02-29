@@ -122,8 +122,6 @@ router.post("/add", adminRequired, function (req, res, next) {
 // GET /competitions/login/:id
 router.get("/login/:id", function (req, res, next) {
 
-    // PROVJERA -> SELECT -> INSERT
-
     // do validation
     const result = schema_id.validate(req.params);
     if (result.error) {
@@ -132,15 +130,27 @@ router.get("/login/:id", function (req, res, next) {
 
     // PROVJERA JE LI KORISNIK UPISAN
 
-    const stmt = db.prepare("INSERT INTO login (id_user, id_competition) VALUES (?, ?);");
+    const checkStmt1 = db.prepare("SELECT count(*) FROM login WHERE id_user = ? AND id_competition = ?;");
+    const checkResult1 = checkStmt1.get(req.user.sub, req.params.id);
 
-    const updateResult = stmt.run(req.user.sub, req.params.id);
+    console.log(checkResult1);
 
-  if (updateResult.changes && updateResult.changes === 1) {
-    res.render("competitions/form", { result: { success: true } });
-  } else {
-    res.render("competitions/form", { result: { database_error: true } });
-  }
-  }); 
+    if (checkResult1["count(*)"] >= 1) {
+        res.render("competitions/form", { result: { database_error: true } });
+    }
+    else {
+
+        // UPIS U BAZU
+
+        const stmt = db.prepare("INSERT INTO login (id_user, id_competition) VALUES (?, ?);");
+        const updateResult = stmt.run(req.user.sub, req.params.id);
+
+        if (updateResult.changes && updateResult.changes === 1) {
+            res.render("competitions/form", { result: { success: true } });
+        } else {
+            res.render("competitions/form", { result: { database_error: true } });
+        }
+    }
+});
 
 module.exports = router;
