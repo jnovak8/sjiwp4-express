@@ -1,15 +1,15 @@
 <div class="p-2">
     {{#if result.display_form}}
     <form method="post" action="/users/data" class="flex flex-col gap-2">
-        <div class="pb-2 flex flex-col">
+        <div class="flex flex-col">
             <label>Ime i prezime</label>
             <input type="text" name="name" value="{{user.name}}" class="bg-neutral" />
         </div>
-        <div class="pb-2 flex flex-col">
+        <div class="flex flex-col">
             <label>E-mail adresa</label>
             <input type="email" name="email" value="{{user.email}}" class="bg-neutral" />
         </div>
-        <div class="pb-2 flex flex-col">
+        <div class="flex flex-col">
             <label>Zaporka</label>
             <input type="password" name="password" class="bg-neutral" />
         </div>
@@ -21,12 +21,12 @@
     {{> validation_error }}
     {{/if}}
 
-    {{#if result.email_in_use}}
-    {{> email_in_use}}
+    {{#if result.database_error}}
+    {{> database_error }}
     {{/if}}
 
-    {{#if result.database_error}}
-    {{> database_error}}
+    {{#if result.email_in_use}}
+    {{> email_in_use}}
     {{/if}}
 
     {{#if result.success}}
@@ -37,8 +37,7 @@
                 <p>
                     Uspješno ste promijenili podatke, sada ćemo vas odjaviti!
                 </p>
-                <div class="card-actions justify-end">
-                </div>
+                <div class="card-actions justify-end"></div>
             </div>
         </div>
         <script>

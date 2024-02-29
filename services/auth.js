@@ -21,9 +21,20 @@ function getUserJwt(id, email, name, role, expDays = 7) {
     return token;
 }
 
+// MIDDLEWARE FOR AUTHENTICATION CHECK
+function authRequired(req, res, next) {
+    if (!req.user) throw new Error("Potrebna je prijava u sustav");
+    next();
+}
+
+function adminRequired(req, res, next) {
+    if (!req.user || req.user.role !== "admin") throw new Error("Dopušteno samo administratorima");
+    next();
+}
+
 // MIDDLEWARE FOR PARSING AUTH COOKIE
 function parseAuthCookie(req, res, next) {
-    const token = req.cookies[process.env.AUTH_COOKIE_KEY];
+    const token = req.cookies[process.env.AUTH_COOKIE_NAME];
     let result = null;
     try {
         result = jwt.verify(token, JWT_SECRET_KEY);
@@ -34,18 +45,6 @@ function parseAuthCookie(req, res, next) {
     req.user = result;
     res.locals.user = result;
     res.locals.user.is_admin = result.role === "admin" ? true : false;
-    next();
-}
-
-// MIDDLEWARE FOR AUTHENTICATION CHECK
-function authRequired(req, res, next) {
-    if (!req.user) throw new Error("Potrebna je prijava u sustav");
-    next();
-}
-
-// MIDDLEWARE FOR ADMIN CHECK
-function adminRequired(req, res, next) {
-    if (!req.user || req.user.role !== "admin") throw new Error("Dopušteno samo administratorima");
     next();
 }
 
@@ -62,8 +61,8 @@ function checkEmailUnique(email) {
 
 module.exports = {
     getUserJwt,
-    parseAuthCookie,
     authRequired,
+    parseAuthCookie,
     checkEmailUnique,
     adminRequired
 };

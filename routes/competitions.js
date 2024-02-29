@@ -12,12 +12,13 @@ router.get("/", authRequired, function (req, res, next) {
         WHERE c.author_id = u.id
         ORDER BY c.apply_till
     `);
+
     const result = stmt.all();
 
     res.render("competitions/index", { result: { items: result } });
 });
 
-// SCHEMA signup
+// SCHEMA id
 const schema_id = Joi.object({
     id: Joi.number().integer().positive().required()
 });
@@ -60,10 +61,10 @@ router.get("/edit/:id", adminRequired, function (req, res, next) {
 
 // SCHEMA edit
 const schema_edit = Joi.object({
+    id: Joi.number().integer().positive().required(),
     name: Joi.string().min(3).max(50).required(),
     description: Joi.string().min(3).max(1000).required(),
-    apply_till: Joi.date().iso().required(),
-    id: Joi.number().integer().positive().required()
+    apply_till: Joi.date().iso().required()
 });
 
 // POST /competitions/edit
@@ -74,6 +75,7 @@ router.post("/edit", adminRequired, function (req, res, next) {
         res.render("competitions/form", { result: { validation_error: true, display_form: true } });
         return;
     }
+
     const stmt = db.prepare("UPDATE competitions SET name = ?, description = ?, apply_till = ? WHERE id = ?;");
     const updateResult = stmt.run(req.body.name, req.body.description, req.body.apply_till, req.body.id);
 
@@ -89,7 +91,7 @@ router.get("/add", adminRequired, function (req, res, next) {
     res.render("competitions/form", { result: { display_form: true } });
 });
 
-// SCHEMA signup
+// SCHEMA add
 const schema_add = Joi.object({
     name: Joi.string().min(3).max(50).required(),
     description: Joi.string().min(3).max(1000).required(),
@@ -114,5 +116,31 @@ router.post("/add", adminRequired, function (req, res, next) {
         res.render("competitions/form", { result: { database_error: true } });
     }
 });
+
+// ZADATAK
+
+// GET /competitions/login/:id
+router.get("/login/:id", function (req, res, next) {
+
+    // PROVJERA -> SELECT -> INSERT
+
+    // do validation
+    const result = schema_id.validate(req.params);
+    if (result.error) {
+        throw new Error("Neispravan poziv");
+    }
+
+    // PROVJERA JE LI KORISNIK UPISAN
+
+    const stmt = db.prepare("INSERT INTO login (id_user, id_competition) VALUES (?, ?);");
+
+    const updateResult = stmt.run(req.user.sub, req.params.id);
+
+  if (updateResult.changes && updateResult.changes === 1) {
+    res.render("competitions/form", { result: { success: true } });
+  } else {
+    res.render("competitions/form", { result: { database_error: true } });
+  }
+  }); 
 
 module.exports = router;
