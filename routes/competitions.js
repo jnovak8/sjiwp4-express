@@ -208,4 +208,39 @@ router.post("/score_change", authRequired, function (req, res, next) {
     }
 });
 
+// ZADATAK 4
+
+// GET /competitions/leaderbaord/:id
+
+router.get("/leaderboard/:id", function (req, res, next) {
+
+    const stmt = db.prepare(`
+        SELECT u.name AS natjecatelj, l.score, l.id_user
+        FROM competitions c, users u, login l
+        WHERE l.id_user = u.id AND l.id_competition = c.id AND l.id_competition = ?
+        ORDER BY l.score DESC;
+    `);
+
+    const result = stmt.all(req.params.id);
+
+    console.log(result);
+
+    const stmt1 = db.prepare(`
+        SELECT name AS natjecanje, apply_till AS datum
+        FROM competitions
+        WHERE id = ?
+    `);
+
+    const data = stmt1.all(req.params.id);
+
+    console.log(data);
+
+    res.render("competitions/leaderboard", { result: { items: result, data}, data: { items: data}});
+});
+
+router.get("/test", adminRequired, function (req, res, next) {
+
+    res.render("competitions/score_input");
+});
+
 module.exports = router;
