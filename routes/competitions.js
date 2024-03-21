@@ -233,14 +233,7 @@ router.get("/leaderboard/:id", function (req, res, next) {
 
     const data = stmt1.all(req.params.id);
 
-    console.log(data);
-
-    res.render("competitions/leaderboard", { result: { items: result, data}, data: { items: data}});
-});
-
-router.get("/test", adminRequired, function (req, res, next) {
-
-    res.render("competitions/score_input");
+    res.render("competitions/leaderboard", { layout:'noheader' ,result: { items: result, data}, data: { items: data}});
 });
 
 module.exports = router;

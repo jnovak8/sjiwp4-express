@@ -20,7 +20,7 @@
                         <!-- row 1 -->
                         {{#each result.items}}
                         <tr>
-                            <th>{{@index}}</th>
+                            <th x-data="{}"><span x-text="{{@index}}+1"></span></th>
                             <td>{{this.natjecatelj}}</td>
                             <td>{{this.score}}</td>
                         </tr>
