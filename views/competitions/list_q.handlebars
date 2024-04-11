@@ -1,0 +1,44 @@
+<div class="p-2">
+
+    <div class="overflow-x-auto">
+  <table class="table">
+    <!-- head -->
+    <thead>
+      <tr>
+        <th>Pitanje</th>
+        <th>Odgovor</th>
+      </tr>
+    </thead>
+    <tbody>
+        {{#each result.items}}
+      <!-- row 1 -->
+      <tr>
+        <th>{{this.q1}}</th>
+        <td><input type="text" placeholder="Unesite Odgovor" class="input input-bordered w-full max-w-xs" /></td>
+      </tr>
+      <!-- row 2 -->
+      <tr>
+        <th>{{this.q2}}</th>
+        <td><input type="text" placeholder="Unesite Odgovor" class="input input-bordered w-full max-w-xs" /></td>
+      </tr>
+      <!-- row 3 -->
+      <tr>
+        <th>{{this.q3}}</th>
+        <td><input type="text" placeholder="Unesite Odgovor" class="input input-bordered w-full max-w-xs" /></td>
+      </tr>
+      <!-- row 4 -->
+      <tr>
+        <th>{{this.q4}}</th>
+        <td><input type="text" placeholder="Unesite Odgovor" class="input input-bordered w-full max-w-xs" /></td>
+      </tr>
+      <!-- row 5 -->
+      <tr>
+        <th>{{this.q5}}</th>
+        <td><input type="text" placeholder="Unesite Odgovor" class="input input-bordered w-full max-w-xs" /></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+</div>
+

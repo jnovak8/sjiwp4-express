@@ -233,7 +233,56 @@ router.get("/leaderboard/:id", function (req, res, next) {
 
     const data = stmt1.all(req.params.id);
 
-    res.render("competitions/leaderboard", { layout:'noheader' ,result: { items: result, data}, data: { items: data}});
+    res.render("competitions/leaderboard", { layout: 'noheader', result: { items: result, data }, data: { items: data } });
+});
+
+// ZADATAK 5
+
+router.get("/questions/:id", authRequired, function (req, res, next) {
+    res.render("competitions/questions", { result: { display_form: true } });
+});
+
+// SCHEMA data
+const schema_questions = Joi.object({
+    q1: Joi.string().min(1).max(250).required(),
+    q2: Joi.string().min(1).max(250).required(),
+    q3: Joi.string().min(1).max(250).required(),
+    q4: Joi.string().min(1).max(250).required(),
+    q5: Joi.string().min(1).max(250).required(),
+});
+
+// POST /competitions/questions
+router.post("/questions", adminRequired, function (req, res, next) {
+    // do validation
+    const result = schema_questions.validate(req.body);
+    if (result.error) {
+        res.render("competitions/questions", { result: { validation_error: true, display_form: true } });
+        return;
+    }
+
+    const stmt = db.prepare("INSERT INTO questions (q1, q2, q3, q4, q5) VALUES (?, ?, ?, ?, ?);");
+    const insertResult = stmt.run(req.body.q1, req.body.q2, req.body.q3, req.body.q4, req.body.q5);
+
+    if (insertResult.changes && insertResult.changes === 1) {
+        res.render("competitions/questions", { result: { success: true } });
+    } else {
+        res.render("competitions/questions", { result: { database_error: true } });
+    }
+});
+
+// GET /competitions/list_q
+router.get("/list_q/:id", authRequired, function (req, res, next) {
+    const stmt = db.prepare(`
+    SELECT q.q1, q.q2, q.q3, q.q4, q.q5, q.id, c.id
+    FROM competitions c, questions q
+    WHERE c.id = q.id
+    `);
+
+    const result = stmt.all();
+
+    console.log(result);
+
+    res.render("competitions/list_q", { result: { items: result } });
 });
 
 module.exports = router;
