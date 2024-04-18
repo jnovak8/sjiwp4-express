@@ -273,9 +273,9 @@ router.post("/questions", adminRequired, function (req, res, next) {
 // GET /competitions/list_q
 router.get("/list_q/:id", authRequired, function (req, res, next) {
     const stmt = db.prepare(`
-    SELECT q.q1, q.q2, q.q3, q.q4, q.q5, q.id, c.id
-    FROM competitions c, questions q
-    WHERE c.id = q.id
+    SELECT q.q1, q.q2, q.q3, q.q4, q.q5, q.id, c.id, l.id_user, u.id
+    FROM competitions c, questions q, login l, users u
+    WHERE c.id = q.id AND l.id_user = u.id
     `);
 
     const result = stmt.all();
@@ -285,4 +285,33 @@ router.get("/list_q/:id", authRequired, function (req, res, next) {
     res.render("competitions/list_q", { result: { items: result } });
 });
 
+// SCHEMA data
+const schema_responses = Joi.object({
+    r1: Joi.string().min(1).max(250).required(),
+    r2: Joi.string().min(1).max(250).required(),
+    r3: Joi.string().min(1).max(250).required(),
+    r4: Joi.string().min(1).max(250).required(),
+    r5: Joi.string().min(1).max(250).required(),
+    id: Joi.number().integer().positive().required()
+});
+
+// POST /competitions/list_q
+router.post("/list_q", function (req, res, next) {
+    // do validation
+    const result = schema_responses.validate(req.body);
+
+    if (result.error) {
+        res.render("competitions/list_q", { result: { validation_error: true, display_form: true } });
+        return;
+    }
+
+    const stmt = db.prepare("INSERT INTO responses (r1, r2, r3, r4, r5, q_id) VALUES (?, ?, ?, ?, ?, ?);");
+    const insertResult = stmt.run(req.body.r1, req.body.r2, req.body.r3, req.body.r4, req.body.r5, req.body.id);
+
+    if (insertResult.changes && insertResult.changes === 1) {
+        res.render("competitions/list_q", { result: { success: true } });
+    } else {
+        res.render("competitions/list_q", { result: { database_error: true } });
+    }
+});
 module.exports = router;
