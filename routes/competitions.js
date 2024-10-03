@@ -190,7 +190,7 @@ const schema_score = Joi.object({
 });
 
 // POST /competitions/score_change/
-router.post("/score_change", authRequired, function (req, res, next) {
+router.post("/score_change/", authRequired, function (req, res, next) {
     // do validation
     const result = schema_score.validate(req.body);
     if (result.error) {
@@ -199,6 +199,8 @@ router.post("/score_change", authRequired, function (req, res, next) {
     }
 
     const stmt = db.prepare("UPDATE login SET score = ? WHERE id = ?;");
+    console.log(req.body.score);
+    console.log(req.body.id);
     const updateResult = stmt.run(req.body.score, req.body.id);
 
     if (updateResult.changes && updateResult.changes === 1) {
@@ -239,7 +241,13 @@ router.get("/leaderboard/:id", function (req, res, next) {
 // ZADATAK 5
 
 router.get("/questions/:id", authRequired, function (req, res, next) {
-    res.render("competitions/questions", { result: { display_form: true } });
+
+    const stmt = db.prepare("SELECT id AS verify_id FROM questions WHERE id = ?;");
+    const result = stmt.all(req.params.id);
+
+    console.log(result);
+
+    res.render("competitions/questions", { result: { display_form: true, items: result } });
 });
 
 // SCHEMA data
@@ -249,25 +257,29 @@ const schema_questions = Joi.object({
     q3: Joi.string().min(1).max(250).required(),
     q4: Joi.string().min(1).max(250).required(),
     q5: Joi.string().min(1).max(250).required(),
+    id: Joi.number().integer().positive().required()
 });
 
 // POST /competitions/questions
 router.post("/questions", adminRequired, function (req, res, next) {
     // do validation
-    const result = schema_questions.validate(req.body);
-    if (result.error) {
-        res.render("competitions/questions", { result: { validation_error: true, display_form: true } });
-        return;
-    }
+    
 
+    const checkStmt1 = db.prepare("SELECT count(*) FROM questions WHERE id = ?;");
+    const checkResult1 = checkStmt1.get(req.body.id);
+
+    if (checkResult1["count(*)"] >= 1) {
+        res.render("competitions/form", { result: { database_error: true } });
+    }
+    else {
     const stmt = db.prepare("INSERT INTO questions (q1, q2, q3, q4, q5) VALUES (?, ?, ?, ?, ?);");
     const insertResult = stmt.run(req.body.q1, req.body.q2, req.body.q3, req.body.q4, req.body.q5);
-
     if (insertResult.changes && insertResult.changes === 1) {
-        res.render("competitions/questions", { result: { success: true } });
+        res.render("competitions/form", { result: { questions_success: true } });
     } else {
         res.render("competitions/questions", { result: { database_error: true } });
     }
+}
 });
 
 // GET /competitions/list_q

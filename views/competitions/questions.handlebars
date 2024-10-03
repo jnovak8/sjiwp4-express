@@ -1,8 +1,7 @@
 <div class="p-2">
-    {{#if result.display_form}}
-    
+
     <form method="post" action="/competitions/questions" class="flex flex-col gap-2">
-    <h1 class="text-5xl font-bold gap-5">Pitanja</h1>
+        <h1 class="text-5xl font-bold gap-5">Pitanja</h1>
         <div class="flex flex-col">
             <label>Pitanje 1</label>
             <input type="text" name="q1" placeholder="Unesite pitanje" class="bg-neutral" />
@@ -23,9 +22,13 @@
             <label>Pitanje 5</label>
             <input type="text" name="q5" placeholder="Unesite pitanje" class="bg-neutral" />
         </div>
+        <div>
+            {{#each result.items}}
+            <input type="hidden" name="id" value="{{this.verify_id}}" />
+            {{/each}}
+        </div>
         {{> form_buttons }}
     </form>
-    {{/if}}
 
     {{#if result.validation_error}}
     {{> validation_error }}
