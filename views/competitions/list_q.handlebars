@@ -3,59 +3,59 @@
   <div class="overflow-x-auto">
     <table class="table">
       <tbody>
-        {{#each result.items}}
+        <h1 class="text-5xl font-bold gap-5">Pitanja i Odgovori</h1> <!-- Display header only once -->
+
         <form method="post" action="/competitions/list_q" class="flex flex-col gap-2">
-          <h1 class="text-5xl font-bold gap-5">Pitanja i Odgovori</h1>
           <div class="flex flex-col">
-            <label>{{this.q1}}</label>
+            <label>{{result.q1}}</label>
             <input type="text" name="r1" placeholder="Unesite odgovor" class="bg-neutral" />
           </div>
           <div class="flex flex-col">
-            <label>{{this.q2}}</label>
+            <label>{{result.q2}}</label>
             <input type="text" name="r2" placeholder="Unesite odgovor" class="bg-neutral" />
           </div>
           <div class="flex flex-col">
-            <label>{{this.q3}}</label>
+            <label>{{result.q3}}</label>
             <input type="text" name="r3" placeholder="Unesite odgovor" class="bg-neutral" />
           </div>
           <div class="flex flex-col">
-            <label>{{this.q4}}</label>
+            <label>{{result.q4}}</label>
             <input type="text" name="r4" placeholder="Unesite odgovor" class="bg-neutral" />
           </div>
           <div class="flex flex-col">
-            <label>{{this.q5}}</label>
+            <label>{{result.q5}}</label>
             <input type="text" name="r5" placeholder="Unesite odgovor" class="bg-neutral" />
           </div>
           <div>
-            <input type="hidden" name="id" value="{{this.id}}" />
+            <input type="hidden" name="id" value="{{result.id}}" />
           </div>
           {{> form_buttons }}
         </form>
-        {{/each}}
+
 
         {{#if result.validation_error}}
         {{> validation_error }}
         {{/if}}
 
         {{#if result.database_error}}
-    {{> database_error }}
-    {{/if}}
+        {{> database_error }}
+        {{/if}}
 
-    {{#if result.success}}
-    <div class="mt-4">
-        <div class="card w-96 bg-primary text-primary-content">
+        {{#if result.success}}
+        <div class="mt-4">
+          <div class="card w-96 bg-primary text-primary-content">
             <div class="card-body">
-                <h2 class="card-title">Uspjeh!</h2>
-                <p>
-                    Odgovorili ste na pitanja! Vaši odgovori su pohranjeni.
-                </p>
-                <div class="card-actions justify-end">
-                    <a class="btn" href="/competitions">Nastavi na pregled natjecanja</a>
-                </div>
+              <h2 class="card-title">Uspjeh!</h2>
+              <p>
+                Odgovorili ste na pitanja! Vaši odgovori su pohranjeni.
+              </p>
+              <div class="card-actions justify-end">
+                <a class="btn" href="/competitions">Nastavi na pregled natjecanja</a>
+              </div>
             </div>
+          </div>
         </div>
-    </div>
-    {{/if}}
+        {{/if}}
 
       </tbody>
     </table>

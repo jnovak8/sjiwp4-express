@@ -263,7 +263,7 @@ const schema_questions = Joi.object({
 // POST /competitions/questions
 router.post("/questions", adminRequired, function (req, res, next) {
     // do validation
-    
+
 
     const checkStmt1 = db.prepare("SELECT count(*) FROM questions WHERE id = ?;");
     const checkResult1 = checkStmt1.get(req.body.id);
@@ -272,29 +272,31 @@ router.post("/questions", adminRequired, function (req, res, next) {
         res.render("competitions/form", { result: { database_error: true } });
     }
     else {
-    const stmt = db.prepare("INSERT INTO questions (q1, q2, q3, q4, q5) VALUES (?, ?, ?, ?, ?);");
-    const insertResult = stmt.run(req.body.q1, req.body.q2, req.body.q3, req.body.q4, req.body.q5);
-    if (insertResult.changes && insertResult.changes === 1) {
-        res.render("competitions/form", { result: { questions_success: true } });
-    } else {
-        res.render("competitions/questions", { result: { database_error: true } });
+        const stmt = db.prepare("INSERT INTO questions (q1, q2, q3, q4, q5) VALUES (?, ?, ?, ?, ?);");
+        const insertResult = stmt.run(req.body.q1, req.body.q2, req.body.q3, req.body.q4, req.body.q5);
+        if (insertResult.changes && insertResult.changes === 1) {
+            res.render("competitions/form", { result: { questions_success: true } });
+        } else {
+            res.render("competitions/questions", { result: { database_error: true } });
+        }
     }
-}
 });
 
 // GET /competitions/list_q
 router.get("/list_q/:id", authRequired, function (req, res, next) {
     const stmt = db.prepare(`
-    SELECT q.q1, q.q2, q.q3, q.q4, q.q5, q.id, c.id, l.id_user, u.id
-    FROM competitions c, questions q, login l, users u
-    WHERE c.id = q.id AND l.id_user = u.id
+    SELECT q.q1, q.q2, q.q3, q.q4, q.q5, q.id, c.id
+    FROM competitions c, questions q
+    WHERE q.id = ?;
     `);
 
-    const result = stmt.all();
+    const result = stmt.all(req.params.id);
+
+    const firstResult = result.length > 0 ? result[0] : null;
 
     console.log(result);
 
-    res.render("competitions/list_q", { result: { items: result } });
+    res.render("competitions/list_q", { result: firstResult });
 });
 
 // SCHEMA data
